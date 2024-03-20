@@ -54,15 +54,14 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone repo and choose branch
-RUN git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git
-RUN git checkout catkin_test
+RUN git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git && cd OpenRobotGPT && git checkout catkin_test && cd ..
 
 # Create a Catkin workspace
 RUN mkdir -p /catkin_ws/src
 WORKDIR /catkin_ws
 
 # Clone your ROS package into the Catkin workspace
-RUN cp ../OpenRobotGPT/src/openrobotgpt src
+RUN cp -r ../OpenRobotGPT/src/openrobotgpt src
 
 # Make openrobotgpt executable
 RUN chmod +x src/openrobotgpt/openrobotgpt.py
