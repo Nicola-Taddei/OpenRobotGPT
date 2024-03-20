@@ -44,6 +44,11 @@ RUN apt-get update && \
     mesa-utils \
     && rm -rf /var/lib/apt/lists/*
 
+# Install git
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install VSCode Server for Remote Development
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
@@ -52,3 +57,6 @@ EXPOSE 8080
 
 # Start code-server
 CMD ["code-server", "--host", "0.0.0.0", "--port", "8080", "--auth", "none", "--disable-telemetry"]
+
+# Set the script as the entrypoint
+ENTRYPOINT ["setup.sh"]
