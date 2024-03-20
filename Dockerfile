@@ -17,7 +17,10 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 RUN apt-get install -y \
   ros-noetic-desktop-full \
-  python3-rosdep
+  python3-rosdep \
+  ros-noetic-catkin \
+  python3-catkin-tools \
+  python3-wstool
 
 # Initialize rosdep
 RUN rosdep init \
@@ -37,12 +40,36 @@ RUN apt-get install -y ros-noetic-moveit
 RUN apt-get install -y python3-pip
 RUN pip3 install pybullet
 
+# Install catkin
+RUN apt-get install python3-catkin
+
+# Install Panda robt package
+RUN apt-get install -y ros-noetic-franka-description ros-noetic-franka-gazebo
+
 # Install x11 for graphic forwarding
 RUN apt-get update && \
     apt-get install -y \
     x11-apps \
     mesa-utils \
     && rm -rf /var/lib/apt/lists/*
+
+# Clone repo and choose branch
+RUN git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git
+RUN git checkout catkin_test
+
+# Create a Catkin workspace
+RUN mkdir -p /catkin_ws/src
+WORKDIR /catkin_ws
+
+# Clone your ROS package into the Catkin workspace
+RUN cp ../OpenRobotGPT/src/openrobotgpt src
+
+# Make openrobotgpt executable
+RUN chmod +x src/openrobotgpt/openrobotgpt.py
+
+# Build the Catkin workspace
+RUN /bin/bash -c "source /opt/ros/noetic/setup.bash && catkin_make"
+
 
 # Install VSCode Server for Remote Development
 RUN curl -fsSL https://code-server.dev/install.sh | sh
