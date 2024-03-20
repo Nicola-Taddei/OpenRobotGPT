@@ -49,6 +49,15 @@ RUN apt-get update && \
     apt-get install -y git && \
     rm -rf /var/lib/apt/lists/*
 
+# Clone repository and change branch
+RUN git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git && cd OpenRobotGPT && git checkout sim
+
+# Move setup.sh into bin
+RUN cp OpenRobotGPT/setup.sh /usr/local/bin/
+
+# Make setup.sh executable
+RUN chmod +x /usr/local/bin/setup.sh
+
 # Install VSCode Server for Remote Development
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
@@ -57,6 +66,9 @@ EXPOSE 8080
 
 # Start code-server
 CMD ["code-server", "--host", "0.0.0.0", "--port", "8080", "--auth", "none", "--disable-telemetry"]
+
+# Change working directory
+WORKDIR /OpenRobotGPT
 
 # Set the script as the entrypoint
 ENTRYPOINT ["setup.sh"]
