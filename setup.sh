@@ -3,9 +3,7 @@
 # Define the ROS distribution
 ROS_DISTRO="noetic"  # Replace with your ROS distribution if different
 
-# Clone repo and change branch
-git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git
-git checkout sim
+# Change branch
 cd OpenRobotGPT
 git checkout sim
 cd ..
