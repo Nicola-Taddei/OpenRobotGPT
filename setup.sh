@@ -3,6 +3,12 @@
 # Define the ROS distribution
 ROS_DISTRO="noetic"  # Replace with your ROS distribution if different
 
+# Move to home
+cd ~
+
+# Clone repository and change branch
+git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git && cd OpenRobotGPT && git checkout sim && cd ..
+
 # Create the Catkin workspace directory
 mkdir -p ~/catkin_ws/src
 
@@ -15,14 +21,11 @@ source /opt/ros/noetic/setup.bash
 # Initialize the Catkin workspace
 catkin_make
 
-# Navigate back to the workspace root
-cd ..
-
 # Copy ROS package inside working directory
 cp -r ../OpenRobotGPT/src/openrobotgpt src
 
 # Make the ros python file executable
-chmod +x src/openrobotgpt/openrobotgpt.py
+chmod +x ../OpenRobotGPT/src/openrobotgpt/openrobotgpt.py
 
 # Build the Catkin workspace
 catkin_make
@@ -32,3 +35,6 @@ source devel/setup.bash
 
 # Print a message indicating successful setup
 echo "ROS workspace setup complete."
+
+# Run a command that keeps the container running
+tail -f /dev/null

@@ -49,11 +49,8 @@ RUN apt-get update && \
     apt-get install -y git && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone repository and change branch
-RUN git clone https://github.com/Nicola-Taddei/OpenRobotGPT.git && cd OpenRobotGPT && git checkout sim
-
 # Move setup.sh into bin
-RUN cp OpenRobotGPT/setup.sh /usr/local/bin/
+COPY setup.sh /usr/local/bin/
 
 # Make setup.sh executable
 RUN chmod +x /usr/local/bin/setup.sh
