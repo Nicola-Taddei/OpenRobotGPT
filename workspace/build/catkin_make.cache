@@ -1,2 +1,0 @@
-
--DCATKIN_DEVEL_PREFIX=/home/nicola/repos/OpenRobotGPT/workspace/devel -DCMAKE_INSTALL_PREFIX=/home/nicola/repos/OpenRobotGPT/workspace/install -G Unix Makefiles
