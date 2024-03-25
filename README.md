@@ -8,10 +8,18 @@ Create an image from the dockerfile
 docker build -t <image_name> .
 ```
 
-Run the container (if you don't have a gpu on your computer, remove the command  `--gpus all -it `)
+Run the docker with gpus, ssh port enabled and x11 forwarding
 ```bash
-docker run --gpus all -it \
-    --env="DISPLAY=$DISPLAY" \
-    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+docker run --gpus all -it --rm \
+    -p 2222:22 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v $(pwd)/workspace:/root/workspace:rw \
     <image_name>
 ```
+
+(From another command line) Connect to the docker
+```bash
+ssh -X -p 2222 root@localhost
+```
+
