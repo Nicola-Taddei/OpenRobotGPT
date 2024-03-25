@@ -23,3 +23,5 @@ docker run --gpus all -it --rm \
 ssh -X -p 2222 root@localhost
 ```
 
+The password is "password"
+
