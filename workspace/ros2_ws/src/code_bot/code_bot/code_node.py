@@ -3,9 +3,12 @@ from rclpy.node import Node
 from robotgpt_interfaces.srv import CodeExecution, EvaluationCode, ObjectStatesR
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+
 from robotgpt_interfaces.msg import ResultEvaluation, CodeExecutionM
 from .bots import DecisionBot, CorrectionBot, EvaluationBot, ChatGPT
+
 import pkg_resources
+import shutil
 import json
 import re
 import os
@@ -45,6 +48,11 @@ class CodeNode(Node):
         # Correction context
         self.correction_context_json_path="/root/workspace/contexts/correction_context.json"
         self.correction_context_txt_path="/root/workspace/contexts/correction_context.txt"
+
+        #dataset
+        self.dataset_path = "/root/workspace/code_bot/dataset"
+        self.current_folder = None
+        self.current_traj_folder = None
 
         # Decision bot
         self.decision_bot = ChatGPT(config_path, secret_path)
@@ -95,6 +103,36 @@ class CodeNode(Node):
         with open(json_file, 'w') as file:
             # Write the dictionary as a JSON formatted string into the file
             json.dump(data, file, indent=4)
+    
+    def _create_folder(self) -> str:
+        '''This function create a folder inside dataset with the name
+           of the current time instant in order to differentiate the 
+           trials
+           
+           output:
+                str: path of the new folder'''
+        
+        #folder name will contain date and time
+        current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        #creation of the folder
+        new_folder_name = os.path.join(self.dataset_path, current_datetime)
+        os.makedirs(new_folder_name)
+        return new_folder_name
+
+    def _create_trajectory_folder(self) -> str:
+        '''This function create a folder inside dataset/current_folder 
+            with the name ot trajectory_ + the index of the traj 
+    
+           output:
+                str: path of the new folder'''
+        #for now only creates trajectory 0
+        #TODO add multiple trajectory
+        i=0
+        traj_name = "trajectory_" + str(i)
+        #creation of the folder
+        new_folder_name = os.path.join(self.current_folder, traj_name)
+        os.makedirs(new_folder_name)
+        return new_folder_name
 
     def _clean_code(self, code: str):
         '''
@@ -136,6 +174,16 @@ class CodeNode(Node):
         code = self.decision_bot.chat(f"Task: {task}")
         code = self._clean_code(code)
 
+        #Create folder for dataset
+        self.current_folder = self._create_folder()
+        #save the prompt used to generate the trajectories
+        prompt_path = os.path.join(new_folder_name, "prompt.txt")
+        # Write the prompt to the prompt.txt file
+        with open(file_path, 'w') as file:
+            file.write(self.task)
+
+        print(f"[INFO] Task prompt saved to: {file_path}")
+
         # ***** DEBUG ******
         print("\n\n")
         print(f"Code #{self.attempts}:\n {code}")
@@ -153,6 +201,9 @@ class CodeNode(Node):
         self.code = code
         # Increment attemps counter
         self.code_execution_req.code = code
+        #create trajectory directory:
+        self.current_traj_folder = self._create_trajectory_folder()
+
         future = self.code_deployment_client.call_async(self.code_execution_req)
         future.add_done_callback(self._code_errors_callback)
 
@@ -165,6 +216,7 @@ class CodeNode(Node):
             self.code_errors = future.result().code_except
             self.objStates = None
             self._correct_code()
+            shutil.rmtree(self.current_folder_traj)
         else:
             self.objStates = None
 
